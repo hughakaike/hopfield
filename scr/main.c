@@ -24,12 +24,15 @@ double test_data[9][9]=
     {1,1,1,1,1,1,1,1,1},
     };
 
-int main(){
+int main(int argc, char *argv[]){
+    if(argc!=2){
+        fprintf(stderr, "Error: invalid argument\n");
+        exit(1);
+    }
     Image* image=new_image();
-    char input_dir[256]="hopfield/input";
 
     char str[256];
-    sprintf(str, "%s%s", input_dir,"/matrix/train_images.dat");
+    sprintf(str, "%s%s", argv[1],"/matrix/train_images.dat");
     FILE* fp_train_images = fopen(str, "r");
     if (fp_train_images == NULL)
     {
@@ -37,7 +40,7 @@ int main(){
         exit(1);
     }
 
-    sprintf(str, "%s%s", input_dir,"/matrix/test_image.dat");
+    sprintf(str, "%s%s", argv[1],"/matrix/test_image.dat");
     FILE* fp_test_images = fopen(str, "r");
     if (fp_test_images == NULL)
     {
@@ -55,7 +58,7 @@ int main(){
         if (length > 0 && line[length - 1] == '\n') {
             line[--length] = '\0';
         }
-        sprintf(str, "%s%s%s", input_dir,"/matrix/", line);
+        sprintf(str, "%s%s%s", argv[1],"/matrix/", line);
         printf("%s\n", str);
         FILE* fp = fopen(str, "r");
         if (fp == NULL)
@@ -73,7 +76,7 @@ int main(){
     if (length > 0 && line[length - 1] == '\n') {
         line[--length] = '\0';
     }
-    sprintf(str, "%s%s%s", input_dir,"/matrix/", line);
+    sprintf(str, "%s%s%s", argv[1],"/matrix/", line);
     printf("%s\n", str);
     FILE* fp = fopen(str, "r");
     if (fp == NULL)
