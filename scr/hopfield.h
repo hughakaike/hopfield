@@ -37,12 +37,18 @@ double lse_flipped(double b, double** mat, double* vec, int m, int n, int flip){
 }
 
 void softmax(double b, double** mat, double* vec, double* result, int m, int n){
-    double Z=0;
-    for(int i=0;i<m;++i){
-        Z+=exp(b*inner_product2(mat[i],vec,n));
+    double Z=0.0;
+    double max=b*inner_product2(mat[0],vec,n);
+    for(int i=1;i<m;++i){
+        if(b*inner_product2(mat[i],vec,n)>max){
+            max=b*inner_product2(mat[i],vec,n);
+        }
     }
     for(int i=0;i<m;++i){
-        result[i]=exp(b*inner_product2(mat[i],vec,n))/Z;
+        Z+=exp(b*inner_product2(mat[i],vec,n)-max);
+    }
+    for(int i=0;i<m;++i){
+        result[i]=exp(b*inner_product2(mat[i],vec,n)-max)/Z;
     }
 }
 
@@ -57,7 +63,6 @@ typedef struct hopfield_data{
     int XN;
     int YN;
     double* threshold;
-    double** weight;
     Image* images;
 } Hopfield;
 
@@ -67,17 +72,10 @@ Hopfield* init_hopfield(int XN, int YN, Image* images){
     hopfield->XN=XN;
     hopfield->YN=YN;
     hopfield->threshold=(double*)malloc(XN*YN*sizeof(double));
-    hopfield->weight=(double**)malloc(XN*XN*YN*YN*sizeof(double*));
     hopfield->images=images;
     for(int i=0;i<XN;++i){
         for(int j=0;j<YN;++j){
             hopfield->threshold[i+j*XN]=0.0;
-        }
-    }
-    for(int i=0;i<XN*YN;++i){
-        hopfield->weight[i]=(double*)malloc(XN*YN*sizeof(double));
-        for(int j=0;j<XN*YN;++j){
-            hopfield->weight[i][j]=0;
         }
     }
     return hopfield;
@@ -90,31 +88,8 @@ Hopfield* new_hopfield(Image* images){
     return init_hopfield(XN, YN, images);
 }
 
-void train_hopfield_hebbian(Hopfield* hopfield, Image* image){
-    int n_data=image->n_data;
-    if (n_data>0){
-        int XN=hopfield->XN;
-        int YN=hopfield->YN;
-        for(int i=0;i<XN*YN;++i){
-            for(int j=0;j<XN*YN;++j){
-                for(int k=0;k<n_data;++k){
-                    hopfield->weight[i][j]+=(2*image->image[k][i]-1)*(2*image->image[k][j]-1)/n_data;
-                }
-            }
-        }
-    }else{
-        printf("The number of images are 0.\n");
-    }
-}
-void train_hopfield(Hopfield* hopfield, char* mode){
-    if (mode=="hebbian"){
-        return train_hopfield_hebbian(hopfield,hopfield->images);
-    }
-}
-
-void predict_hopfield(Hopfield* hopfield, int input_XN,int input_YN,double** input,double** output, char* mode){
+void predict_hopfield_calssic(Hopfield* hopfield, int input_XN,int input_YN,double** input,double** output){
     double* input_vec=alloc_vector(input_XN*input_YN);
-    
     for(int i=0;i<input_XN;++i){
         for(int j=0;j<input_YN;++j){
             input_vec[i+j*input_XN]=input[i][j];
@@ -122,66 +97,33 @@ void predict_hopfield(Hopfield* hopfield, int input_XN,int input_YN,double** inp
     }
     int XN=hopfield->XN;
     int YN=hopfield->YN;
+    Image* images=hopfield->images;
+    int n_data=images->n_data;
     double* predict=alloc_vector(XN*YN);
-    if (XN!=input_XN || YN!=input_YN){
-        printf("The size of the input is different.\n");
-    }else{
-        if (mode=="classic"){
-            int change_flag=1;
-            while (change_flag==1){
-                change_flag=0;
-                for(int i=0;i<XN*YN;++i){
-                    predict[i]=0;
-                    for(int j=0;j<XN*YN;++j){
-                        predict[i]+=hopfield->weight[i][j]*(2*input_vec[j]-1);
-                    }
-                    if (predict[i]>hopfield->threshold[i]){
-                        predict[i]=1.0;
-                    }else{
-                        predict[i]=0.0;
-                    }
-                    if(predict[i]!=input_vec[i]){
-                        change_flag=1;
-                    }
+    int change_flag=1;
+    double weight;
+    while (change_flag==1){
+        change_flag=0;
+        for(int i=0;i<XN*YN;++i){
+            predict[i]=0.0;
+            for(int j=0;j<XN*YN;++j){
+                weight=0.0;
+                for(int k=0;k<n_data;++k){
+                    weight+=(2*images->image[k][i]-1)*(2*images->image[k][j]-1)/n_data;
                 }
-                for(int i=0;i<XN*YN;++i){
-                    input_vec[i]=predict[i];
-                }
+                predict[i]+=weight*(2*input_vec[j]-1);
             }
-        }else if(mode=="modern"){
-            int change_flag=1;
-            double energy_diff;
-            Image* images=hopfield->images;
-            int n_data=images->n_data;
-            while (change_flag==1){
-                change_flag=0;
-                for(int i=0;i<XN*YN;++i){ 
-                    energy_diff=0;
-                    for (int n=0;n<n_data;++n){
-                        energy_diff+=exp(inner_product2(images->image[n],input_vec,XN*YN)-2*(2*input_vec[i]-1)*(2*images->image[n][i]-1))-exp(inner_product2(images->image[n],input_vec,XN*YN));
-                    }
-                    printf("%lf\n",energy_diff);
-                    if (energy_diff>0){
-                        if (input_vec[i]==0.0){
-                            input_vec[i]=1.0;
-                        }else{
-                            input_vec[i]=0.0;
-                        }
-                        change_flag=1;
-                    }
-                }
+            if (predict[i]>hopfield->threshold[i]){
+                predict[i]=1.0;
+            }else{
+                predict[i]=0.0;
             }
-        }else if(mode=="continuous"){
-            Image* images=hopfield->images;
-            int n_data=images->n_data;
-            double* softmax_result=alloc_vector(n_data);
-            softmax(4.0,images->image,input_vec,softmax_result,n_data,XN*YN);
-            for(int i=0;i<XN*YN;++i){
-                for(int j=0;j<n_data;++j){
-                    predict[i]+=softmax_result[j]*images->image[j][i];
-                }
-                input_vec[i]=predict[i];
+            if(predict[i]!=input_vec[i]){
+                change_flag=1;
             }
+        }
+        for(int i=0;i<XN*YN;++i){
+            input_vec[i]=predict[i];
         }
     }
     for(int i=0;i<input_XN;++i){
@@ -191,6 +133,91 @@ void predict_hopfield(Hopfield* hopfield, int input_XN,int input_YN,double** inp
     }
     free(input_vec);
     free(predict);
+}
+
+void predict_hopfield_modern(Hopfield* hopfield, int input_XN,int input_YN,double** input,double** output){
+    double* input_vec=alloc_vector(input_XN*input_YN);
+    for(int i=0;i<input_XN;++i){
+        for(int j=0;j<input_YN;++j){
+            input_vec[i+j*input_XN]=input[i][j];
+        }
+    }
+    int XN=hopfield->XN;
+    int YN=hopfield->YN;
+    Image* images=hopfield->images;
+    int n_data=images->n_data;
+    int change_flag=1;
+    double energy_diff;
+    while (change_flag==1){
+        change_flag=0;
+        for(int i=0;i<XN*YN;++i){ 
+            energy_diff=0;
+            for (int n=0;n<n_data;++n){
+                energy_diff+=exp(inner_product2(images->image[n],input_vec,XN*YN)-2*(2*input_vec[i]-1)*(2*images->image[n][i]-1))-exp(inner_product2(images->image[n],input_vec,XN*YN));
+            }
+            printf("%lf\n",energy_diff);
+            if (energy_diff>0){
+                if (input_vec[i]==0.0){
+                    input_vec[i]=1.0;
+                }else{
+                    input_vec[i]=0.0;
+                }
+                change_flag=1;
+            }
+        }
+    }
+    for(int i=0;i<input_XN;++i){
+        for(int j=0;j<input_YN;++j){
+            output[i][j]=input_vec[i+j*input_XN];
+        }
+    }
+    free(input_vec);
+}
+
+void predict_hopfield_coutinuous(Hopfield* hopfield, int input_XN,int input_YN,double** input,double** output){
+    double* input_vec=alloc_vector(input_XN*input_YN);
+    for(int i=0;i<input_XN;++i){
+        for(int j=0;j<input_YN;++j){
+            input_vec[i+j*input_XN]=input[i][j];
+        }
+    }
+    int XN=hopfield->XN;
+    int YN=hopfield->YN;
+    Image* images=hopfield->images;
+    int n_data=images->n_data;
+    double* predict=alloc_vector(XN*YN);
+    double* softmax_result=alloc_vector(n_data);
+    softmax(4.0,images->image,input_vec,softmax_result,n_data,XN*YN);
+    for(int i=0;i<XN*YN;++i){
+        for(int j=0;j<n_data;++j){
+            predict[i]+=softmax_result[j]*images->image[j][i];
+        }
+        input_vec[i]=predict[i];
+    }
+    for(int i=0;i<input_XN;++i){
+        for(int j=0;j<input_YN;++j){
+            output[i][j]=input_vec[i+j*input_XN];
+        }
+    }
+    free(input_vec);
+    free(predict);
+    free(softmax_result);
+}
+
+void predict_hopfield(Hopfield* hopfield, int input_XN,int input_YN,double** input,double** output, char* mode){
+    int XN=hopfield->XN;
+    int YN=hopfield->YN;
+    if (XN!=input_XN || YN!=input_YN){
+        printf("The size of the input is different.\n");
+    }else{
+        if (mode=="classic"){
+            predict_hopfield_calssic(hopfield,input_XN,input_YN,input,output);
+        }else if(mode=="modern"){
+            predict_hopfield_modern(hopfield,input_XN,input_YN,input,output);
+        }else if(mode=="continuous"){
+            predict_hopfield_coutinuous(hopfield,input_XN,input_YN,input,output);
+        }
+    }
 }
 
 Image* init_image(){
@@ -219,7 +246,6 @@ void add_image(Image* image, int XN, int YN, double** data){
                 image->image[0][i+j*XN]=data[i][j]/255;
             }
         }
-        fprint_matrix(stderr, 1,XN*YN,image->image);
     }else{
         if (XN==image->XN && YN==image->YN){
             image->n_data++;

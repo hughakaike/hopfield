@@ -71,18 +71,6 @@ double make_test_image(double** image, double** noisy_image, int m, int n, char*
     }
 }
 
-double test_data[9][9]=
-    {{1,1,1,1,1,1,1,1,1},
-    {1,1,1,1,1,1,1,1,1},
-    {1,1,1,1,1,0,0,1,1},
-    {1,1,1,1,1,0,0,1,1},
-    {1,1,1,1,0,1,1,1,1},
-    {1,1,0,1,0,0,1,1,1},
-    {1,1,0,0,0,0,1,1,1},
-    {1,1,1,1,1,0,1,1,1},
-    {1,1,1,1,1,1,1,1,1},
-    };
-
 int main(int argc, char *argv[]){
     if(argc!=3){
         fprintf(stderr, "Error: invalid argument\n");
@@ -156,17 +144,12 @@ int main(int argc, char *argv[]){
         fprintf(stderr, "Error: file can not open\n");
         exit(1);
     }
-    printf("2\n");
-    fprint_matrix(stderr, m, n, test_image);
+    //fprint_matrix(stderr, m, n, test_image);
     fprint_matrix(fp_test, m, n, test_image);
-    printf("3\n");
     
     Hopfield* hopfield=new_hopfield(image);
-    train_hopfield(hopfield,"hebbian");
     double** output=alloc_matrix(m,n);
     predict_hopfield(hopfield, m,n,test_image,output,"continuous");
-
-    printf("4\n");
 
     sprintf(str, "%s%s", argv[2],"/matrix/output_image.dat");
     FILE* fp_output = fopen(str, "w");
@@ -176,8 +159,6 @@ int main(int argc, char *argv[]){
         fprintf(stderr, "Error: file can not open\n");
         exit(1);
     }
-
-    printf("6\n");
 
     return 0;
 }

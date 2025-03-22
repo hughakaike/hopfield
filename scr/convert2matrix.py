@@ -12,7 +12,7 @@ CDIR=os.getcwd()
 path=sys.argv[1]
 os.chdir(os.path.join(CDIR,path,"images"))
 
-image_files = glob.glob("*.png")
+image_files = glob.glob("*.bmp")
 
 if len(image_files) == 0:
     print("No image files found.")

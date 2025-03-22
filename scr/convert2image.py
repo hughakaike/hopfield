@@ -18,14 +18,14 @@ os.chdir(os.path.join(CDIR,path,"matrix"))
 image_files = glob.glob("*.dat")
 
 if len(image_files) == 0:
-    print("No image files found.")
+    print("No data files found.")
     sys.exit(1)
 
 try:
-    os.chdir(os.path.join(CDIR,path,"image"))
+    os.chdir(os.path.join(CDIR,path,"images"))
 except:
-    os.mkdir(os.path.join(CDIR,path,"image"))
-    os.chdir(os.path.join(CDIR,path,"image"))
+    os.mkdir(os.path.join(CDIR,path,"images"))
+    os.chdir(os.path.join(CDIR,path,"images"))
 
 print(image_files)
 
