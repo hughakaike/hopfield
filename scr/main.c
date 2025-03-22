@@ -6,10 +6,69 @@
 #include "hopfield.h"
 #include "matrix.h"
 
+#define MY_PI 3.141592653589793238462643
+
 const double noise_rate=0.1;
+const double sigma=0.1;
 
 double Uniform( void ){
 	return ((double)rand()+1.0)/((double)RAND_MAX+2.0);
+}
+
+double Normal(double mu,double sigma){
+    double X=Uniform();
+    double Y=Uniform();
+    return sigma*sqrt(-2.0*log(X))*cos(2.0*MY_PI*Y)+mu;
+}
+
+double clamp(double x, double min, double max){
+    if (x<min){
+        return min;
+    }else if (x>max){
+        return max;
+    }else{
+        return x;
+    }
+}
+
+double make_test_image(double** image, double** noisy_image, int m, int n, char* mode){
+    if(mode=="flip"){
+        for(int i=0; i<m; ++i){
+            for(int j=0; j<n; ++j){
+                if (Uniform()<noise_rate){
+                    noisy_image[i][j]=1.0-image[i][j]/255;
+                }else{
+                    noisy_image[i][j]=image[i][j]/255;
+                }
+            }
+        }
+    }else if(mode=="salt_and_pepper"){
+        for(int i=0; i<m; ++i){
+            for(int j=0; j<n; ++j){
+                if (Uniform()<noise_rate){
+                    if (Uniform()<0.5){
+                        noisy_image[i][j]=0.0;
+                    }else{
+                        noisy_image[i][j]=1.0;
+                    }
+                }else{
+                    noisy_image[i][j]=image[i][j]/255;
+                }
+            }
+        }
+    }else if(mode=="white"){
+        for(int i=0; i<m; ++i){
+            for(int j=0; j<n; ++j){
+                noisy_image[i][j]=clamp(image[i][j]/255+Uniform(),0.0,1.0);
+            }
+        }
+    }else if(mode=="gaussian"){
+        for(int i=0; i<m; ++i){
+            for(int j=0; j<n; ++j){
+                noisy_image[i][j]=clamp(image[i][j]/255+Normal(0.0,sigma),0.0,1.0);
+            }
+        }
+    }
 }
 
 double test_data[9][9]=
@@ -25,7 +84,7 @@ double test_data[9][9]=
     };
 
 int main(int argc, char *argv[]){
-    if(argc!=2){
+    if(argc!=3){
         fprintf(stderr, "Error: invalid argument\n");
         exit(1);
     }
@@ -86,38 +145,39 @@ int main(int argc, char *argv[]){
     }
     read_matrix(fp, &m, &n, &a);
     double** test_image=alloc_matrix(m,n);
-    for(int i=0; i<m; ++i){
-        for(int j=0; j<n; ++j){
-            if (Uniform()<noise_rate){
-                test_image[i][j]=(255-a[i][j])/255;
-            }else{
-                test_image[i][j]=a[i][j]/255;
-            }
-        }
-    }
+    make_test_image(a, test_image, m, n, "gaussian");
 
-    for(int i=0; i<m; ++i){
-        for(int j=0; j<n; ++j){
-            printf("%1.0lf ", test_image[i][j]);
-        }
-        printf("\n");
+    //write test image
+    sprintf(str, "%s%s", argv[2],"/matrix/test_image.dat");
+    printf("1\n");
+    FILE* fp_test = fopen(str, "w");
+    if (fp_test == NULL)
+    {
+        fprintf(stderr, "Error: file can not open\n");
+        exit(1);
     }
-    printf("\n");
+    printf("2\n");
+    fprint_matrix(stderr, m, n, test_image);
+    fprint_matrix(fp_test, m, n, test_image);
+    printf("3\n");
     
     Hopfield* hopfield=new_hopfield(image);
     train_hopfield(hopfield,"hebbian");
     double** output=alloc_matrix(m,n);
     predict_hopfield(hopfield, m,n,test_image,output,"continuous");
-    for(int i=0; i<m; ++i){
-        for(int j=0; j<n; ++j){
-            printf("%1.0lf ", output[i][j]);
-        }
-        printf("\n");
+
+    printf("4\n");
+
+    sprintf(str, "%s%s", argv[2],"/matrix/output_image.dat");
+    FILE* fp_output = fopen(str, "w");
+    fprint_matrix(fp_output, m, n,output);
+    if (fp_output == NULL)
+    {
+        fprintf(stderr, "Error: file can not open\n");
+        exit(1);
     }
 
-    FILE* fpa = fopen("hopfield/test_log.dat", "w");
-    //fprint_matrix(fpa, m*n, m*n, hopfield->weight);
-    fprint_matrix(fpa, 2, m*n, image->image);
-    
+    printf("6\n");
+
     return 0;
 }
