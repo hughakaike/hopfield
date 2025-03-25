@@ -1,7 +1,7 @@
 # なにこれ？
 五月祭用hopfield network
 
-#使い方
+# 使い方
 ## win系
 powershellなどでmain.batを実行
 ## linux系
