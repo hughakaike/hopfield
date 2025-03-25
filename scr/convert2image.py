@@ -12,8 +12,17 @@ from PIL import Image, ImageOps
 
 CDIR=os.getcwd()
 
-path=sys.argv[1]
-os.chdir(os.path.join(CDIR,path,"matrix"))
+with open("config.txt") as f:
+    for s_line in f:
+        if "output_folder" in s_line:
+            path = s_line.split()[1]
+            break
+
+try:
+    os.chdir(os.path.join(CDIR,path,"matrix"))
+except:
+    print("No output folder found.")
+    sys.exit(1)
 
 image_files = glob.glob("*.dat")
 

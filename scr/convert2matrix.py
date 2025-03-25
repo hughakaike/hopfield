@@ -9,10 +9,22 @@ from PIL import Image, ImageOps
 
 CDIR=os.getcwd()
 
-path=sys.argv[1]
-os.chdir(os.path.join(CDIR,path,"images"))
+with open("config.txt") as f:
+    for s_line in f:
+        if "input_folder" in s_line:
+            path = s_line.split()[1]
+            print(path)
+        elif "image_file_format" in s_line:
+            image_file_format = s_line.split()[1]
+            print(image_file_format)
 
-image_files = glob.glob("*.bmp")
+try:
+    os.chdir(os.path.join(CDIR,path,"images"))
+except:
+    print("No input folder found.")
+    sys.exit(1)
+
+image_files = glob.glob("*."+image_file_format)
 
 if len(image_files) == 0:
     print("No image files found.")
