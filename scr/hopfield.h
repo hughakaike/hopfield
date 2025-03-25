@@ -3,6 +3,14 @@
 #include <stdlib.h>
 #include "matrix.h"
 
+#define MY_PI 3.141592653589793238462643
+
+/*
+################
+#math functions#
+################
+*/
+
 double inner_product(double* vec1, double* vec2, int n){
     double result=0;
     for(int i=0;i<n;++i){
@@ -51,6 +59,72 @@ void softmax(double b, double** mat, double* vec, double* result, int m, int n){
         result[i]=exp(b*inner_product2(mat[i],vec,n)-max)/Z;
     }
 }
+
+double Uniform( void ){
+	return ((double)rand()+1.0)/((double)RAND_MAX+2.0);
+}
+
+double Normal(double mu,double sigma){
+    double X=Uniform();
+    double Y=Uniform();
+    return sigma*sqrt(-2.0*log(X))*cos(2.0*MY_PI*Y)+mu;
+}
+
+double clamp(double x, double min, double max){
+    if (x<min){
+        return min;
+    }else if (x>max){
+        return max;
+    }else{
+        return x;
+    }
+}
+
+double make_test_image(double** image, double** noisy_image, int m, int n, char* mode, double noise_rate, double sigma){
+    if(mode=="flip"){
+        for(int i=0; i<m; ++i){
+            for(int j=0; j<n; ++j){
+                if (Uniform()<noise_rate){
+                    noisy_image[i][j]=1.0-image[i][j]/255;
+                }else{
+                    noisy_image[i][j]=image[i][j]/255;
+                }
+            }
+        }
+    }else if(mode=="salt_and_pepper"){
+        for(int i=0; i<m; ++i){
+            for(int j=0; j<n; ++j){
+                if (Uniform()<noise_rate){
+                    if (Uniform()<0.5){
+                        noisy_image[i][j]=0.0;
+                    }else{
+                        noisy_image[i][j]=1.0;
+                    }
+                }else{
+                    noisy_image[i][j]=image[i][j]/255;
+                }
+            }
+        }
+    }else if(mode=="white"){
+        for(int i=0; i<m; ++i){
+            for(int j=0; j<n; ++j){
+                noisy_image[i][j]=clamp(image[i][j]/255+Uniform(),0.0,1.0);
+            }
+        }
+    }else if(mode=="gaussian"){
+        for(int i=0; i<m; ++i){
+            for(int j=0; j<n; ++j){
+                noisy_image[i][j]=clamp(image[i][j]/255+Normal(0.0,sigma),0.0,1.0);
+            }
+        }
+    }
+}
+
+/*
+################
+#data structure#
+################
+*/
 
 typedef struct image_data{
     int XN;

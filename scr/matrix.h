@@ -41,7 +41,15 @@ static inline void read_matrix(FILE *fp, int *m, int *n, double ***mat) {
       fscanf(fp, "%lf", &mat_elem(*mat, i, j));
     }
   }
-  printf("ok\n");
+}
+
+//print double vector[m]
+static inline void fprint_vector(FILE *fp, int m, double *vec) {
+  int i;
+  fprintf(fp, "%d\n", m);
+  for (i = 0; i < m; ++i) {
+    fprintf(fp, "%10.3f ", vec[i]);
+  }
 }
 
 //print double matrix[m][n]
@@ -49,7 +57,7 @@ static inline void fprint_matrix(FILE *fp, int m, int n, double **mat) {
   int i, j;
   fprintf(fp, "%d %d\n", m, n);
   for (i = 0; i < m; ++i) {
-    for (j = 0; j < n; ++j) fprintf(fp, "%10.2f ", mat[i][j]);
+    for (j = 0; j < n; ++j) fprintf(fp, "%10.3f ", mat[i][j]);
     fprintf(fp, "\n");
   }
 }

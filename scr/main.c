@@ -6,95 +6,55 @@
 #include "hopfield.h"
 #include "matrix.h"
 
-#define MY_PI 3.141592653589793238462643
+double noise_rate=0.1;
+double sigma=0.1;
 
-const double noise_rate=0.1;
-const double sigma=0.1;
+int main(){
+    printf("reading config file...\n");
+    Image* image=new_image();
+    char str[256];
 
-double Uniform( void ){
-	return ((double)rand()+1.0)/((double)RAND_MAX+2.0);
-}
-
-double Normal(double mu,double sigma){
-    double X=Uniform();
-    double Y=Uniform();
-    return sigma*sqrt(-2.0*log(X))*cos(2.0*MY_PI*Y)+mu;
-}
-
-double clamp(double x, double min, double max){
-    if (x<min){
-        return min;
-    }else if (x>max){
-        return max;
-    }else{
-        return x;
-    }
-}
-
-double make_test_image(double** image, double** noisy_image, int m, int n, char* mode){
-    if(mode=="flip"){
-        for(int i=0; i<m; ++i){
-            for(int j=0; j<n; ++j){
-                if (Uniform()<noise_rate){
-                    noisy_image[i][j]=1.0-image[i][j]/255;
-                }else{
-                    noisy_image[i][j]=image[i][j]/255;
-                }
-            }
-        }
-    }else if(mode=="salt_and_pepper"){
-        for(int i=0; i<m; ++i){
-            for(int j=0; j<n; ++j){
-                if (Uniform()<noise_rate){
-                    if (Uniform()<0.5){
-                        noisy_image[i][j]=0.0;
-                    }else{
-                        noisy_image[i][j]=1.0;
-                    }
-                }else{
-                    noisy_image[i][j]=image[i][j]/255;
-                }
-            }
-        }
-    }else if(mode=="white"){
-        for(int i=0; i<m; ++i){
-            for(int j=0; j<n; ++j){
-                noisy_image[i][j]=clamp(image[i][j]/255+Uniform(),0.0,1.0);
-            }
-        }
-    }else if(mode=="gaussian"){
-        for(int i=0; i<m; ++i){
-            for(int j=0; j<n; ++j){
-                noisy_image[i][j]=clamp(image[i][j]/255+Normal(0.0,sigma),0.0,1.0);
-            }
-        }
-    }
-}
-
-int main(int argc, char *argv[]){
-    if(argc!=3){
-        fprintf(stderr, "Error: invalid argument\n");
+    //config file open
+    FILE* fp_config = fopen("config.txt", "r");
+    if (fp_config == NULL)
+    {
+        fprintf(stderr, "Error: config.txt can not open\n");
         exit(1);
     }
-    Image* image=new_image();
+    char buffer[256],input_folder[256],output_folder[256],noise_mode[256], hopfield_mode[256];
+    while( fscanf(fp_config,"%s",buffer) != EOF ){
+        if(strcmp(buffer,"input_folder")==0){
+            fscanf(fp_config,"%s",input_folder);
+            printf("input folder:%s\n",input_folder);
+        }else if(strcmp(buffer,"output_folder")==0){
+            fscanf(fp_config,"%s",output_folder);
+            printf("output folder:%s\n",output_folder);
+        }else if(strcmp(buffer,"noise_mode")==0){
+            fscanf(fp_config,"%s",noise_mode);
+            printf("noise mode:%s\n",noise_mode);
+        }else if(strcmp(buffer,"noise_rate")==0){
+            fscanf(fp_config,"%lf",&noise_rate);
+            printf("noise rate:%lf\n",noise_rate);
+        }else if(strcmp(buffer,"sigma")==0){
+            fscanf(fp_config,"%lf",&sigma);
+            printf("sigma:%lf\n",sigma);
+        }else if(strcmp(buffer,"hopfield_mode")==0){
+            fscanf(fp_config,"%s",hopfield_mode);
+            printf("hopfield mode:%s\n",hopfield_mode);
+        }
+    }
+    fclose(fp_config);
 
-    char str[256];
-    sprintf(str, "%s%s", argv[1],"/matrix/train_images.dat");
+    //open train_image.dat
+    printf("\nreading train images...\n");
+    sprintf(str, "%s%s", input_folder,"/matrix/train_images.dat");
     FILE* fp_train_images = fopen(str, "r");
     if (fp_train_images == NULL)
     {
-        fprintf(stderr, "Error: file can not open\n");
+        fprintf(stderr, "Error: train_image.dat can not open\n");
         exit(1);
     }
 
-    sprintf(str, "%s%s", argv[1],"/matrix/test_image.dat");
-    FILE* fp_test_images = fopen(str, "r");
-    if (fp_test_images == NULL)
-    {
-        fprintf(stderr, "Error: file can not open\n");
-        exit(1);
-    }
-    
     //input train images
     char line[256];
     size_t length;
@@ -105,7 +65,7 @@ int main(int argc, char *argv[]){
         if (length > 0 && line[length - 1] == '\n') {
             line[--length] = '\0';
         }
-        sprintf(str, "%s%s%s", argv[1],"/matrix/", line);
+        sprintf(str, "%s%s%s", input_folder,"/matrix/", line);
         printf("%s\n", str);
         FILE* fp = fopen(str, "r");
         if (fp == NULL)
@@ -117,13 +77,24 @@ int main(int argc, char *argv[]){
         add_image(image, m, n, a);
     }
 
+
+    //open test_image.dat
+    printf("\nreading test image...\n");
+    sprintf(str, "%s%s", input_folder,"/matrix/test_image.dat");
+    FILE* fp_test_images = fopen(str, "r");
+    if (fp_test_images == NULL)
+    {
+        fprintf(stderr, "Error: test_image.dat can not open\n");
+        exit(1);
+    }
+
     //input test image
     fgets(line, 256, fp_test_images);
     length = strlen(line);
     if (length > 0 && line[length - 1] == '\n') {
         line[--length] = '\0';
     }
-    sprintf(str, "%s%s%s", argv[1],"/matrix/", line);
+    sprintf(str, "%s%s%s", input_folder,"/matrix/", line);
     printf("%s\n", str);
     FILE* fp = fopen(str, "r");
     if (fp == NULL)
@@ -133,25 +104,28 @@ int main(int argc, char *argv[]){
     }
     read_matrix(fp, &m, &n, &a);
     double** test_image=alloc_matrix(m,n);
-    make_test_image(a, test_image, m, n, "gaussian");
+    make_test_image(a, test_image, m, n, noise_mode,noise_rate,sigma);
+    
+    printf("\n");
 
     //write test image
-    sprintf(str, "%s%s", argv[2],"/matrix/test_image.dat");
-    printf("1\n");
+    sprintf(str, "%s%s", output_folder,"/matrix/test_image.dat");
     FILE* fp_test = fopen(str, "w");
     if (fp_test == NULL)
     {
         fprintf(stderr, "Error: file can not open\n");
         exit(1);
     }
-    //fprint_matrix(stderr, m, n, test_image);
+    printf("writing test image...\n");
     fprint_matrix(fp_test, m, n, test_image);
+    fclose(fp_test);
     
     Hopfield* hopfield=new_hopfield(image);
     double** output=alloc_matrix(m,n);
-    predict_hopfield(hopfield, m,n,test_image,output,"continuous");
+    predict_hopfield(hopfield, m,n,test_image,output,hopfield_mode);
 
-    sprintf(str, "%s%s", argv[2],"/matrix/output_image.dat");
+    printf("writing result image...\n");
+    sprintf(str, "%s%s", output_folder,"/matrix/output_image.dat");
     FILE* fp_output = fopen(str, "w");
     fprint_matrix(fp_output, m, n,output);
     if (fp_output == NULL)
@@ -159,6 +133,7 @@ int main(int argc, char *argv[]){
         fprintf(stderr, "Error: file can not open\n");
         exit(1);
     }
+    fclose(fp_output);
 
     return 0;
 }
