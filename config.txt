@@ -1,6 +1,7 @@
 #I/O
 input_folder input
 output_folder output
+image_file_format bmp
 
 #make test image
 noise_mode gaussian
