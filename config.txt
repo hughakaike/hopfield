@@ -1,0 +1,11 @@
+#I/O
+input_folder input
+output_folder output
+
+#make test image
+noise_mode gaussian
+noise_rate 0.1
+sigma 0.1
+
+#hop field network
+hopfield_mode modern
