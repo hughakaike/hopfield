@@ -7,8 +7,6 @@ powershellなどでrun.batを実行
 ## linux系
 準備中
 
-aaa
-
 # config.txtの見かた
 ## input_folder output_folder
 いじらなくてよい
