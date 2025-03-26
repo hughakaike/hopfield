@@ -81,7 +81,7 @@ double clamp(double x, double min, double max){
 }
 
 double make_test_image(double** image, double** noisy_image, int m, int n, char* mode, double noise_rate, double sigma){
-    if(mode=="flip"){
+    if(strcmp(mode,"flip")==0){
         for(int i=0; i<m; ++i){
             for(int j=0; j<n; ++j){
                 if (Uniform()<noise_rate){
@@ -91,7 +91,7 @@ double make_test_image(double** image, double** noisy_image, int m, int n, char*
                 }
             }
         }
-    }else if(mode=="salt_and_pepper"){
+    }else if(strcmp(mode,"salt_and_pepper")==0){
         for(int i=0; i<m; ++i){
             for(int j=0; j<n; ++j){
                 if (Uniform()<noise_rate){
@@ -105,18 +105,20 @@ double make_test_image(double** image, double** noisy_image, int m, int n, char*
                 }
             }
         }
-    }else if(mode=="white"){
+    }else if(strcmp(mode,"white")==0){
         for(int i=0; i<m; ++i){
             for(int j=0; j<n; ++j){
                 noisy_image[i][j]=clamp(image[i][j]/255+Uniform(),0.0,1.0);
             }
         }
-    }else if(mode=="gaussian"){
+    }else if(strcmp(mode,"gaussian")==0){
         for(int i=0; i<m; ++i){
             for(int j=0; j<n; ++j){
                 noisy_image[i][j]=clamp(image[i][j]/255+Normal(0.0,sigma),0.0,1.0);
             }
         }
+    }else{
+        printf("unknown noise mode\n");
     }
 }
 
@@ -284,12 +286,14 @@ void predict_hopfield(Hopfield* hopfield, int input_XN,int input_YN,double** inp
     if (XN!=input_XN || YN!=input_YN){
         printf("The size of the input is different.\n");
     }else{
-        if (mode=="classic"){
+        if (strcmp(mode,"classic")==0){
             predict_hopfield_calssic(hopfield,input_XN,input_YN,input,output);
-        }else if(mode=="modern"){
+        }else if(strcmp(mode,"modern")==0){
             predict_hopfield_modern(hopfield,input_XN,input_YN,input,output);
-        }else if(mode=="continuous"){
+        }else if(strcmp(mode,"continuous")==0){
             predict_hopfield_coutinuous(hopfield,input_XN,input_YN,input,output);
+        }else{
+            printf("unknown hopfield mode\n");
         }
     }
 }
