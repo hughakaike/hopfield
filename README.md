@@ -5,7 +5,7 @@
 ## win系
 powershellなどでrun.batを実行
 ## linux系
-シェルでrun.shを実行
+準備中
 
 # config.txtの見かた
 ## input_folder output_folder
