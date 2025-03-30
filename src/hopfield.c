@@ -1,7 +1,9 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "matrix.h"
+#include "hopfield.h"
 
 #define MY_PI 3.141592653589793238462643
 
@@ -128,6 +130,7 @@ double make_test_image(double** image, double** noisy_image, int m, int n, char*
 ################
 */
 
+/*
 typedef struct image_data{
     int XN;
     int YN;
@@ -141,6 +144,7 @@ typedef struct hopfield_data{
     double* threshold;
     Image* images;
 } Hopfield;
+*/
 
 
 Hopfield* init_hopfield(int XN, int YN, Image* images){

@@ -6,7 +6,7 @@ image_file_format bmp
 #make test image
 noise_mode gaussian
 noise_rate 0.1
-sigma 0.1
+sigma 0.5S
 
 #hop field network
-hopfield_mode modern
+hopfield_mode continuous

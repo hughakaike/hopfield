@@ -1,6 +1,5 @@
 #!/bin/bash
-SCRIPT_DIR="scr"
 
-python $SCRIPT_DIR/convert2matrix.py
-./main.exe
-python $SCRIPT_DIR/convert2image.py
+python3 src/convert2matrix.py
+./build/main
+python3 src/convert2image.py

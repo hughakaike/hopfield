@@ -1,0 +1,1 @@
+/usr/bin/cc -rdynamic CMakeFiles/main.dir/main.c.o CMakeFiles/main.dir/matrix.c.o CMakeFiles/main.dir/hopfield.c.o -o main  -lm 

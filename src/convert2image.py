@@ -42,4 +42,4 @@ for file in image_files:
     image_gray=np.loadtxt(os.path.join(CDIR,path,"matrix",file),skiprows=1)
     pil_img = Image.fromarray(image_gray*255)
     pil_img = pil_img.convert("L")
-    pil_img.save(file+".png")
+    pil_img.save(file[0:-4]+".png")

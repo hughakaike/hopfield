@@ -40,7 +40,8 @@ print(image_files)
 
 f_list = open(os.path.join(CDIR,path,"matrix","train_images.dat"), 'w')
 for file in image_files:
-    f_list.write(file[0:-4]+".dat\n")
+    if file[0:-4] != "test":
+        f_list.write(file[0:-4]+".dat\n")
     image = Image.open(os.path.join(CDIR,path,"images",file))
     image_gray = ImageOps.grayscale(image)
     w, h = image.size
