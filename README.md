@@ -2,10 +2,20 @@
 五月祭用hopfield network
 
 # 使い方
-## win系
-powershellなどでrun.batを実行
-## linux系
-準備中
+## windows・linux系
+GUI操作を行う場合はpaint.pyを実行
+
+学習用の画像はinput/imagesに入れる。デフォルトでは256×256の画像にのみ対応
+
+hopfield network単体で動かす場合には
+
+```windows
+./run.bat
+```
+
+```linux系
+./run.sh
+```
 
 # config.txtの見かた
 ## input_folder output_folder
