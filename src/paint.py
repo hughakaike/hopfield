@@ -21,7 +21,7 @@ class Paint(object):
         self.eraser_button = Button(self.root, text='消しゴム', command=self.use_eraser)
         self.eraser_button.grid(row=0, column=2)
 
-        self.size_button = Scale(self.root, from_=1, to=10, orient=HORIZONTAL)
+        self.size_button = Scale(self.root, from_=1, to=20, orient=HORIZONTAL)
         self.size_button.grid(row=0, column=3)
 
         font1 = font.Font(family='Helvetica', size=10, weight='bold')
@@ -38,8 +38,11 @@ class Paint(object):
         self.img_file=None
         self.image_canvas.create_image(0, 0, image = self.img_file, anchor = NW)
 
-        self_predict_button = Button(self.root, text='予測', command=self.predict)
-        self_predict_button.grid(row=2, column=0)
+        self.predict_button = Button(self.root, text='予測', command=self.predict)
+        self.predict_button.grid(row=2, column=0)
+
+        self.clear_button = Button(self.root, text='クリア', command=self.clear_canvas)
+        self.clear_button.grid(row=2,column=1)
 
         self.setup()
         self.root.mainloop()
@@ -82,13 +85,18 @@ class Paint(object):
     def reset(self, event):
         self.old_x, self.old_y = None, None
 
+    def clear_canvas(self):
+        self.canvas.delete("all")
+        self.image_canvas.delete("all")
+
     def predict(self):
         CDIR=os.getcwd()
         self.canvas.postscript(file="test.ps")
         saveimg= Image.open(CDIR+"/test.ps")
         saveimg.convert("1")
         saveimg=saveimg.resize(size=(256,256))
-        saveimg.save(CDIR+"/input/images/test.bmp")
+        saveimg.save(CDIR+"/input/images/test.png")
+
         self.status.set("画像を生成中・・・")
         self.root.update()
         os.system('./run.sh')

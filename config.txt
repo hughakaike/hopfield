@@ -1,12 +1,12 @@
 #I/O
 input_folder input
 output_folder output
-image_file_format bmp
+image_file_format png
 
 #make test image
 noise_mode gaussian
-noise_rate 0.1
-sigma 0.5S
+noise_rate 0.0
+sigma 0.0
 
 #hop field network
 hopfield_mode continuous
