@@ -8,38 +8,46 @@ from PIL import Image, ImageOps, ImageFilter, ImageTk, ImageDraw, EpsImagePlugin
 import time
 import subprocess
 
+INPUT_FILE = "Aerial.bmp"
+OUTPUT_SIZE = (256, 256)
+OUTPUT_FORMAT = 'bmp'
+
 class Paint():
     DEFAULT_PEN_SIZE = 5.0
     DEFAULT_COLOR = 'black'
-
+    
     def __init__(self):
         self.root = Tk()
+        self.root.title("paint with image")
 
         self.pen_button = Button(self.root, text='ペン', command=self.use_pen)
         self.pen_button.grid(row=0, column=0)
 
-        self.brush_button = Button(self.root, text='ブラシ', command=self.use_brush)
-        self.brush_button.grid(row=0, column=1)
-
         self.eraser_button = Button(self.root, text='消しゴム', command=self.use_eraser)
-        self.eraser_button.grid(row=0, column=2)
+        self.eraser_button.grid(row=0, column=1)
+
+        font1 = font.Font(family='Helvetica', size=10)
+        self.size_label = Label(self.root, text="width", font=font1)
+        self.size_label.grid(row=1, column=2)
 
         self.size_button = Scale(self.root, from_=1, to=20, orient=HORIZONTAL)
-        self.size_button.grid(row=0, column=3)
+        self.size_button.grid(row=0, column=2)
 
         font1 = font.Font(family='Helvetica', size=10, weight='bold')
         self.status = StringVar()
         self.status.set("(None.)")
         self.status_label = Label(self.root, textvariable=self.status, font=font1, fg="red")
-        self.status_label.grid(row=0, column=4, columnspan=2)
+        self.status_label.grid(row=0, column=3, columnspan=2)
 
         self.canvas = Canvas(self.root, bg='white', width=256, height=256)
         self.canvas.grid(row=2, column=0, columnspan=3)
+        self.img_file_input = ImageTk.PhotoImage(Image.open("input/images/"+INPUT_FILE))
+        self.canvas.create_image(0, 0, image = self.img_file_input, anchor = NW)
 
         self.image_canvas=Canvas(self.root, bg='white', width=256, height=256)
         self.image_canvas.grid(row=2, column=3, columnspan=3)
-        self.img_file=None
-        self.image_canvas.create_image(0, 0, image = self.img_file, anchor = NW)
+        self.img_file_result = None
+        self.image_canvas.create_image(0, 0, image = self.img_file_result, anchor = NW)
 
         self.predict_button = Button(self.root, text='予測', command=self.predict)
         self.predict_button.grid(row=3, column=0)
@@ -91,19 +99,20 @@ class Paint():
     def clear_canvas(self):
         self.canvas.delete("all")
         self.image_canvas.delete("all")
+        self.canvas.create_image(0, 0, image = self.img_file_input, anchor = NW)
 
     def predict(self):
         CDIR=os.getcwd()
         self.canvas.postscript(file="test.ps")
         saveimg= Image.open(CDIR+"/test.ps")
         saveimg.convert("1")
-        saveimg=saveimg.resize(size=(256,256))
-        saveimg.save(CDIR+"/input/images/test.png")
+        saveimg=saveimg.resize(size=OUTPUT_SIZE)
+        saveimg.save(CDIR+"/input/images/test."+OUTPUT_FORMAT)
 
         self.status.set("画像を生成中・・・")
         self.root.update()
         if platform.system() == 'win32':
-            cp=subprocess.run("./run.bat", shell=True)
+            cp=subprocess.run("start run.bat", shell=True)
         elif platform.system() == 'Linux':
             cp=subprocess.run("./run.sh",shell=True)
         else:
@@ -112,8 +121,8 @@ class Paint():
         if cp.returncode != 0:
             self.status.set("Error: " + str(cp.returncode))
             return
-        self.img_file = PhotoImage(file = "output/images/output_image.png")
-        self.image_canvas.create_image(0, 0, image = self.img_file, anchor = NW)
+        self.img_file_result = PhotoImage(file = "output/images/output_image.png")
+        self.image_canvas.create_image(0, 0, image = self.img_file_result, anchor = NW)
         self.status.set("完了") 
 
 if __name__ == '__main__':
