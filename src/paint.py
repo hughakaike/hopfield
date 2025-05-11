@@ -1,12 +1,13 @@
 from tkinter import *
 from tkinter.colorchooser import askcolor
 from tkinter import font
-import customtkinter as ctk
 import os
 import platform
 from PIL import Image, ImageOps, ImageFilter, ImageTk, ImageDraw, EpsImagePlugin
 import time
 import subprocess
+import time
+
 
 class Paint():
     DEFAULT_PEN_SIZE = 5.0
@@ -99,11 +100,17 @@ class Paint():
         saveimg.convert("1")
         saveimg=saveimg.resize(size=(256,256))
         saveimg.save(CDIR+"/input/images/test.png")
-
         self.status.set("画像を生成中・・・")
         self.root.update()
-        if platform.system() == 'win32':
-            cp=subprocess.run("./run.bat", shell=True)
+        if platform.system() == 'Windows':
+            #cp=subprocess.run(["start", "run.bat"], shell=True)
+            cp=subprocess.run("timeout /t 2 /nobreak >nul", shell=True)
+            cp=subprocess.run("python src/convert2matrix.py", shell=True)
+            cp=subprocess.run("timeout /t 2 /nobreak >nul", shell=True)
+            cp=subprocess.run("start main.exe", shell=True)
+            cp=subprocess.run("timeout /t 2 /nobreak >nul", shell=True)
+            cp=subprocess.run("python src/convert2image.py", shell=True)
+            cp=subprocess.run("timeout /t 1 /nobreak >nul", shell=True)
         elif platform.system() == 'Linux':
             cp=subprocess.run("./run.sh",shell=True)
         else:
@@ -112,9 +119,9 @@ class Paint():
         if cp.returncode != 0:
             self.status.set("Error: " + str(cp.returncode))
             return
+        self.status.set("完了") 
         self.img_file = PhotoImage(file = "output/images/output_image.png")
         self.image_canvas.create_image(0, 0, image = self.img_file, anchor = NW)
-        self.status.set("完了") 
 
 if __name__ == '__main__':
     print("os name = " + platform.system())
