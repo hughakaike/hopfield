@@ -1,4 +1,5 @@
 from tkinter import *
+import tkinter.filedialog 
 from tkinter.colorchooser import askcolor
 from tkinter import font
 import customtkinter as ctk
@@ -8,9 +9,11 @@ from PIL import Image, ImageOps, ImageFilter, ImageTk, ImageDraw, EpsImagePlugin
 import time
 import subprocess
 
-INPUT_FILE = "Aerial.bmp"
+INPUT_FILE = "2.png"
 OUTPUT_SIZE = (256, 256)
-OUTPUT_FORMAT = 'bmp'
+OUTPUT_FORMAT = 'png'
+
+IDIR = "C:/Users/hugha/hopfield/input/images"
 
 class Paint():
     DEFAULT_PEN_SIZE = 5.0
@@ -41,19 +44,24 @@ class Paint():
 
         self.canvas = Canvas(self.root, bg='white', width=256, height=256)
         self.canvas.grid(row=2, column=0, columnspan=3)
-        self.img_file_input = ImageTk.PhotoImage(Image.open("input/images/"+INPUT_FILE))
-        self.canvas.create_image(0, 0, image = self.img_file_input, anchor = NW)
-
+        
+        image_path = os.path.join("input/images", INPUT_FILE)
+        self.img_file_input_pil = Image.open(image_path)
+        self.img_file_input = ImageTk.PhotoImage(self.img_file_input_pil)
+        self.canvas.create_image(0, 0, image=self.img_file_input, anchor=NW)
+    
         self.image_canvas=Canvas(self.root, bg='white', width=256, height=256)
         self.image_canvas.grid(row=2, column=3, columnspan=3)
         self.img_file_result = None
-        self.image_canvas.create_image(0, 0, image = self.img_file_result, anchor = NW)
 
+        self.image_button = Button(self.root, text='画像を読み込み', command=self.image)
+        self.image_button.grid(row=3, column=0)
+        
         self.predict_button = Button(self.root, text='予測', command=self.predict)
-        self.predict_button.grid(row=3, column=0)
+        self.predict_button.grid(row=3, column=1)
 
         self.clear_button = Button(self.root, text='クリア', command=self.clear_canvas)
-        self.clear_button.grid(row=3,column=1)
+        self.clear_button.grid(row=3,column=2)
 
         self.setup()
         self.root.mainloop()
@@ -100,6 +108,17 @@ class Paint():
         self.canvas.delete("all")
         self.image_canvas.delete("all")
         self.canvas.create_image(0, 0, image = self.img_file_input, anchor = NW)
+        
+    def image(self):
+        self.status.set("画像を選択中・・・")
+        self.root.update()
+        file_path = tkinter.filedialog.askopenfilename(initialdir=IDIR, title="Select file", filetypes=(("PNG files", "*.png"), ("BMP files", "*.bmp"), ("All files", "*.*")))
+        if file_path:
+            self.img_file_input = ImageTk.PhotoImage(Image.open(file_path))
+            self.canvas.create_image(0, 0, image = self.img_file_input, anchor = NW)
+            self.status.set("完了") 
+        else:
+            self.status.set("キャンセル")
 
     def predict(self):
         CDIR=os.getcwd()
@@ -111,7 +130,7 @@ class Paint():
 
         self.status.set("画像を生成中・・・")
         self.root.update()
-        if platform.system() == 'win32':
+        if platform.system() == 'Windows':
             cp=subprocess.run("start run.bat", shell=True)
         elif platform.system() == 'Linux':
             cp=subprocess.run("./run.sh",shell=True)
