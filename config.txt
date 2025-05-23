@@ -10,3 +10,4 @@ sigma 0.0
 
 #hop field network
 hopfield_mode continuous
+beta 2.0

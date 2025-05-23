@@ -1,3 +1,9 @@
-/home/akaike-hiyu280/hopfield-1/src/build/CMakeFiles/main.dir
-/home/akaike-hiyu280/hopfield-1/src/build/CMakeFiles/edit_cache.dir
-/home/akaike-hiyu280/hopfield-1/src/build/CMakeFiles/rebuild_cache.dir
+/mnt/c/Users/hugha/hopfield/src/build/CMakeFiles/main.dir
+/mnt/c/Users/hugha/hopfield/src/build/CMakeFiles/edit_cache.dir
+/mnt/c/Users/hugha/hopfield/src/build/CMakeFiles/rebuild_cache.dir
+/mnt/c/Users/hugha/hopfield/src/build/libmatrix/CMakeFiles/matrix.dir
+/mnt/c/Users/hugha/hopfield/src/build/libmatrix/CMakeFiles/edit_cache.dir
+/mnt/c/Users/hugha/hopfield/src/build/libmatrix/CMakeFiles/rebuild_cache.dir
+/mnt/c/Users/hugha/hopfield/src/build/libhopfield/CMakeFiles/hopfield.dir
+/mnt/c/Users/hugha/hopfield/src/build/libhopfield/CMakeFiles/edit_cache.dir
+/mnt/c/Users/hugha/hopfield/src/build/libhopfield/CMakeFiles/rebuild_cache.dir

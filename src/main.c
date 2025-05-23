@@ -4,10 +4,11 @@
 #include <time.h>
 #include <string.h>
 #include "hopfield.h"
-#include "matrix.h"
+//#include "matrix.h"
 
 double noise_rate=0.1;
 double sigma=0.1;
+double beta=2.0;
 
 int main(){
     printf("reading config file...\n");
@@ -41,6 +42,9 @@ int main(){
         }else if(strcmp(buffer,"hopfield_mode")==0){
             fscanf(fp_config,"%s",hopfield_mode);
             printf("hopfield mode:%s\n",hopfield_mode);
+        }else if(strcmp(buffer,"beta")==0){
+            fscanf(fp_config,"%lf",&beta);
+            printf("beta:%lf\n",beta);
         }
     }
     fclose(fp_config);
@@ -122,7 +126,7 @@ int main(){
     
     Hopfield* hopfield=new_hopfield(image);
     double** output=alloc_matrix(m,n);
-    predict_hopfield(hopfield, m,n,test_image,output,hopfield_mode);
+    predict_hopfield(hopfield, m,n,test_image,output,hopfield_mode,beta);
 
     printf("writing result image...\n");
     sprintf(str, "%s%s", output_folder,"/matrix/output_image.dat");

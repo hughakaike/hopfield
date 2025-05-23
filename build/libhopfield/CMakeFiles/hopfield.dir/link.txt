@@ -1,0 +1,2 @@
+/usr/bin/ar qc libhopfield.a CMakeFiles/hopfield.dir/hopfield.c.o
+/usr/bin/ranlib libhopfield.a

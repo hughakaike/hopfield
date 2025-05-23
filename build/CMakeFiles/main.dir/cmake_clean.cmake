@@ -1,10 +1,6 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/main.dir/hopfield.c.o"
-  "CMakeFiles/main.dir/hopfield.c.o.d"
   "CMakeFiles/main.dir/main.c.o"
   "CMakeFiles/main.dir/main.c.o.d"
-  "CMakeFiles/main.dir/matrix.c.o"
-  "CMakeFiles/main.dir/matrix.c.o.d"
   "main"
   "main.pdb"
 )

@@ -1,6 +1,3 @@
-# ifndef HOPFIELD_H
-# define HOPFIELD_H
-
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,7 +28,7 @@ double Normal(double mu,double sigma);
 
 double clamp(double x, double min, double max);
 
-double make_test_image(double** image, double** noisy_image, int m, int n, char* mode, double noise_rate, double sigma);
+void make_test_image(double** image, double** noisy_image, int m, int n, char* mode, double noise_rate, double sigma);
 /*
 ################
 #data structure#
@@ -63,14 +60,12 @@ void predict_hopfield_calssic(Hopfield* hopfield, int input_XN,int input_YN,doub
 
 void predict_hopfield_modern(Hopfield* hopfield, int input_XN,int input_YN,double** input,double** output);
 
-void predict_hopfield_coutinuous(Hopfield* hopfield, int input_XN,int input_YN,double** input,double** output);
+void predict_hopfield_coutinuous(Hopfield* hopfield, int input_XN,int input_YN,double** input,double** output, double beta);
 
-void predict_hopfield(Hopfield* hopfield, int input_XN,int input_YN,double** input,double** output, char* mode);
+void predict_hopfield(Hopfield* hopfield, int input_XN,int input_YN,double** input,double** output, char* mode, double beta);
 
 Image* init_image();
 
 Image* new_image();
 
 void add_image(Image* image, int XN, int YN, double** data);
-
-# endif
