@@ -127,13 +127,7 @@ class RightFrame(ctk.CTkFrame):
 
     def activate_button(self, some_button, filename, eraser_mode=False):
         self.active_button.configure(fg_color=self.nbc)
-        match self.active_button:
-            case self.pen_button:
-                self.active_button.configure(image=self.Image(self.pen_filename,self.nib))
-            case self.brush_button:
-                self.active_button.configure(image=self.Image(self.brush_filename,self.nib))
-            case self.eraser_button:
-                self.active_button.configure(image=self.Image(self.eraser_filename,self.nib))
+        self.active_button.configure(image=self.Image(filename,self.nib))
         self.active_button.configure(text_color=self.ntc)
         some_button.configure(fg_color=self.abc)
         some_button.configure(image=self.Image(filename,self.aib))
